@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search - CareerCompassAI</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-compass"></i>
+                <span>CareerCompassAI</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                
+                {% if current_user.is_authenticated %}
+                    {% if current_user.user_type == 'student' %}
+                        <li><a href="{{ url_for('resume_page') }}" class="nav-link">
+                            <i class="fas fa-file-alt"></i> Resume
+                        </a></li>
+                        <li><a href="{{ url_for('jobs_page') }}" class="nav-link active">
+                            <i class="fas fa-briefcase"></i> Jobs
+                        </a></li>
+                        <li><a href="{{ url_for('chatbot_page') }}" class="nav-link">
+                            <i class="fas fa-robot"></i> AI Mentor
+                        </a></li>
+                        <li><a href="{{ url_for('mentorship_page') }}" class="nav-link">
+                            <i class="fas fa-handshake"></i> Mentors
+                        </a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('mentorship_page') }}" class="nav-link">
+                            <i class="fas fa-handshake"></i> Mentorship
+                        </a></li>
+                        <li><a href="{{ url_for('profile_page') }}" class="nav-link">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <div class="user-menu">
+                {% if current_user.is_authenticated %}
+                    <div>
+                        <div class="user-name">
+                            <i class="fas fa-user"></i> {{ current_user.name }}
+                        </div>
+                        <div class="user-type">{{ current_user.user_type.upper() }}</div>
+                    </div>
+                    {% if current_user.user_type == 'mentor' %}
+                        <a href="{{ url_for('profile_page') }}" class="logout-link">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{{ url_for('auth.signup') }}" class="nav-link" style="background: var(--primary-color); color: white; padding: 0.5rem 1.2rem; border-radius: 6px;">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                {% endif %}
+                <button class="theme-toggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Container -->
+    <div class="container">
+        <section class="page-section">
+            <h1><i class="fas fa-search"></i> Job & Skill Finder</h1>
+            <p class="section-subtitle">Search for jobs and learning courses by role or skill</p>
+
+            <!-- Search Form -->
+            <div class="search-container">
+                <input type="text" id="searchQuery" placeholder="Search for job title or skill..." class="search-input">
+                <button onclick="searchJobs()" class="button-primary">Search</button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state" style="display: none;">
+                <div class="spinner"></div>
+                <p>Searching for opportunities...</p>
+            </div>
+
+            <!-- Results Tabs -->
+            <div id="resultsSection" style="display: none;">
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('jobs')">Jobs</button>
+                    <button class="tab-button" onclick="switchTab('courses')">Courses</button>
+                </div>
+
+                <!-- Jobs Tab -->
+                <div id="jobsTab" class="tab-content active">
+                    <div id="jobsContainer" class="jobs-grid">
+                        <!-- Jobs will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Courses Tab -->
+                <div id="coursesTab" class="tab-content" style="display: none;">
+                    <div id="coursesContainer" class="courses-grid">
+                        <!-- Courses will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <!-- Sample Results Button (for demo) -->
+            <div class="demo-section">
+                <p>Or try sample results:</p>
+                <button onclick="loadSampleData()" class="button-secondary">Load Sample Data</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 CareerCompassAI. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Search jobs and courses
+        async function searchJobs() {
+            const query = document.getElementById('searchQuery').value.trim();
+            
+            if (!query) {
+                showError('Please enter a search query');
+                return;
+            }
+            
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loadingState').style.display = 'flex';
+            
+            try {
+                // Fetch jobs
+                const jobsResponse = await fetch('/api/jobs/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                
+                // Fetch courses
+                const coursesResponse = await fetch('/api/jobs/courses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                
+                if (!jobsResponse.ok || !coursesResponse.ok) {
+                    throw new Error('Error fetching results');
+                }
+                
+                const jobsData = await jobsResponse.json();
+                const coursesData = await coursesResponse.json();
+                
+                displayJobs(jobsData);
+                displayCourses(coursesData);
+                
+                document.getElementById('resultsSection').style.display = 'block';
+                window.scrollTo(0, 0);
+            } catch (error) {
+                showError(error.message || 'Network error. Make sure backend is running');
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // Display jobs
+        function displayJobs(data) {
+            const container = document.getElementById('jobsContainer');
+            container.innerHTML = '';
+            
+            const jobs = data.jobs || {};
+            const allJobs = [
+                ...(jobs.linkedin || []),
+                ...(jobs.naukri || []),
+                ...(jobs.internshala || []),
+                ...(jobs.indeed || [])
+            ];
+            
+            if (allJobs.length === 0) {
+                container.innerHTML = '<p class="no-results">No jobs found. Try a different search term.</p>';
+                return;
+            }
+            
+            allJobs.forEach(job => {
+                const jobCard = document.createElement('div');
+                jobCard.className = 'job-card';
+                jobCard.innerHTML = `
+                    <h3>${job.title}</h3>
+                    <p class="company">${job.company}</p>
+                    <p class="location">📍 ${job.location}</p>
+                    ${job.salary ? `<p class="salary">💰 ${job.salary}</p>` : ''}
+                    <a href="${job.link}" target="_blank" class="apply-btn">View More →</a>
+                `;
+                container.appendChild(jobCard);
+            });
+        }
+
+        // Display courses
+        function displayCourses(data) {
+            const container = document.getElementById('coursesContainer');
+            container.innerHTML = '';
+            
+            const courses = data.courses || {};
+            const allCourses = [
+                ...(courses.coursera || []),
+                ...(courses.udemy || []),
+                ...(courses.google_courses || []),
+                ...(courses.linkedin_learning || [])
+            ];
+            
+            if (allCourses.length === 0) {
+                container.innerHTML = '<p class="no-results">No courses found. Try a different search term.</p>';
+                return;
+            }
+            
+            allCourses.forEach(course => {
+                const courseCard = document.createElement('div');
+                courseCard.className = 'course-card';
+                courseCard.innerHTML = `
+                    <h3>${course.title}</h3>
+                    <p class="platform">${course.platform}</p>
+                    <p class="instructor">👨‍🏫 ${course.instructor}</p>
+                    ${course.duration ? `<p class="duration">⏱️ ${course.duration}</p>` : ''}
+                    ${course.certificate ? `<p class="certificate">✓ Certificate Included</p>` : ''}
+                    <a href="${course.link}" target="_blank" class="enroll-btn">View Course →</a>
+                `;
+                container.appendChild(courseCard);
+            });
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            // Hide all tabs
+            document.getElementById('jobsTab').style.display = 'none';
+            document.getElementById('coursesTab').style.display = 'none';
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            if (tab === 'jobs') {
+                document.getElementById('jobsTab').style.display = 'block';
+                document.querySelectorAll('.tab-button')[0].classList.add('active');
+            } else {
+                document.getElementById('coursesTab').style.display = 'block';
+                document.querySelectorAll('.tab-button')[1].classList.add('active');
+            }
+        }
+
+        // Load sample data
+        async function loadSampleData() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loadingState').style.display = 'flex';
+            
+            try {
+                const sampleResponse = await fetch('/api/jobs/sample');
+                if (!sampleResponse.ok) throw new Error('Error loading sample data');
+                
+                const data = await sampleResponse.json();
+                document.getElementById('searchQuery').value = data.query;
+                displayJobs(data);
+                displayCourses(data);
+                document.getElementById('resultsSection').style.display = 'block';
+                window.scrollTo(0, 0);
+            } catch (error) {
+                showError(error.message || 'Error loading sample data');
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // Show error
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

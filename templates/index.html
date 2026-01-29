@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompassAI - AI-Powered Career Guidance</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+            align-items: center;
+            flex: 1;
+            margin: 0 3rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            color: #6366f1;
+        }
+
+        .nav-link.active {
+            color: #6366f1;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 0.25rem;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+            padding-left: 1rem;
+            border-left: 1px solid #eee;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .user-type {
+            background: #e0e7ff;
+            color: #6366f1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .logout-link {
+            color: #ef4444;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .logout-link:hover {
+            color: #dc2626;
+        }
+
+        .theme-toggle {
+            background: #f3f4f6;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: #e5e7eb;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            background: white;
+            color: #6366f1;
+            border: none;
+            padding: 0.85rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Features Section */
+        .features {
+            max-width: 1400px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 3rem;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #6366f1;
+            margin: 0 auto 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: #f3f4f6;
+            border-radius: 12px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .card-link {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: gap 0.3s;
+        }
+
+        .card-link:hover {
+            gap: 0.8rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            color: #d1d5db;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-compass"></i>
+                <span>CareerCompassAI</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link active">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                
+                {% if current_user.is_authenticated %}
+                    {% if current_user.user_type == 'student' %}
+                        <li><a href="{{ url_for('resume_page') }}" class="nav-link">
+                            <i class="fas fa-file-alt"></i> Resume
+                        </a></li>
+                        <li><a href="{{ url_for('jobs_page') }}" class="nav-link">
+                            <i class="fas fa-briefcase"></i> Jobs
+                        </a></li>
+                        <li><a href="{{ url_for('chatbot_page') }}" class="nav-link">
+                            <i class="fas fa-robot"></i> AI Mentor
+                        </a></li>
+                        <li><a href="{{ url_for('mentorship_page') }}" class="nav-link">
+                            <i class="fas fa-handshake"></i> Mentors
+                        </a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('mentorship_page') }}" class="nav-link">
+                            <i class="fas fa-handshake"></i> Mentorship
+                        </a></li>
+                        <li><a href="{{ url_for('profile_page') }}" class="nav-link">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <div class="user-menu">
+                {% if current_user.is_authenticated %}
+                    <div>
+                        <div class="user-name">
+                            <i class="fas fa-user"></i> {{ current_user.name }}
+                        </div>
+                        <div class="user-type">{{ current_user.user_type.upper() }}</div>
+                    </div>
+                    {% if current_user.user_type == 'mentor' %}
+                        <a href="{{ url_for('profile_page') }}" class="logout-link">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{{ url_for('auth.signup') }}" class="nav-link" style="background: #6366f1; color: white; padding: 0.5rem 1.2rem; border-radius: 6px;">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                {% endif %}
+                <button class="theme-toggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Your AI Career Companion</h1>
+            <p>Analyze resumes, discover opportunities, and get personalized guidance</p>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('resume_page') }}" class="cta-button">
+                    <i class="fas fa-arrow-right"></i> Get Started
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.signup') }}" class="cta-button">
+                    <i class="fas fa-arrow-right"></i> Get Started Free
+                </a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>Our Features</h2>
+        <div class="features-grid">
+            <!-- Resume Analyzer -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3>Resume Analyzer</h3>
+                <p>Get ATS scores, identify missing keywords, and receive actionable improvement suggestions tailored to your target job.</p>
+                <a href="{{ url_for('resume_page') }}" class="card-link">
+                    Learn More <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Job Search -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Job & Course Finder</h3>
+                <p>Search jobs and courses from multiple platforms. Discover opportunities aligned with your skills and career goals.</p>
+                <a href="{{ url_for('jobs_page') }}" class="card-link">
+                    Learn More <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- AI Mentor -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>AI Career Mentor</h3>
+                <p>Chat with AI 24/7 for resume tips, career advice, interview prep, and skill development guidance.</p>
+                <a href="{{ url_for('chatbot_page') }}" class="card-link">
+                    Learn More <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Mentorship -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Expert Mentorship</h3>
+                <p>Connect with industry mentors for personalized 1-on-1 guidance, career coaching, and real-world insights.</p>
+                <a href="{{ url_for('mentorship_page') }}" class="card-link">
+                    Learn More <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 CareerCompassAI. All rights reserved. | Powered by AI & LangChain</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

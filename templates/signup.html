@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - CareerCompassAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .otp-section {
+            display: none;
+        }
+        .otp-section.show {
+            display: block;
+        }
+        .email-verified {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .email-verified.show {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .otp-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .otp-input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        .verify-button {
+            display: flex;
+            gap: 10px;
+        }
+        .send-otp-btn {
+            flex: 1;
+        }
+        .verify-otp-btn {
+            flex: 1;
+        }
+        .timer {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+        .resend-link {
+            color: #6366f1;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+        .resend-link:hover {
+            color: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">CareerCompassAI</h1>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
+                <li><a href="{{ url_for('auth.login') }}" class="nav-link">Log In</a></li>
+                <button id="themeToggle" class="theme-toggle">🌙 Dark</button>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sign Up Container -->
+    <div class="auth-page">
+        <div class="auth-wrapper">
+            <!-- Left Side - Benefits -->
+            <div class="auth-side-benefits">
+                <div class="benefits-content">
+                    <h2>Join CareerCompassAI</h2>
+                    <p>Accelerate your career with AI-powered guidance</p>
+                    
+                    <div class="benefits-list">
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Resume Analysis & Optimization</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Job & Course Discovery</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>24/7 AI Career Mentor</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Mentorship Opportunities</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Form -->
+            <div class="auth-side-form">
+                <div class="auth-card">
+                    <h1>Create Account</h1>
+                    <p class="auth-subtitle">Start your career transformation today</p>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    <i class="fas fa-info-circle"></i> {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+
+                    <!-- Email Verified Message -->
+                    <div class="email-verified" id="emailVerified">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Email verified successfully!</span>
+                    </div>
+
+                    <!-- Sign Up Form -->
+                    <form id="signupForm" class="auth-form">
+                        <!-- Full Name -->
+                        <div class="form-section">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-user"></i> Full Name
+                            </label>
+                            <input type="text" id="name" name="name" placeholder="John Doe" required>
+                        </div>
+
+                        <!-- Email with OTP Verification -->
+                        <div class="form-section">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                                <button type="button" id="sendOtpBtn" class="button-primary send-otp-btn">
+                                    <i class="fas fa-paper-plane"></i> Verify
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- OTP Section -->
+                        <div class="otp-section" id="otpSection">
+                            <div class="form-section">
+                                <label for="otp" class="form-label">
+                                    <i class="fas fa-key"></i> Enter 4-Digit OTP
+                                </label>
+                                <p style="font-size: 12px; color: #999; margin-bottom: 10px;">We've sent a verification code to your email</p>
+                                <div class="otp-input-group" id="otpInputGroup">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="0" inputmode="numeric">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="1" inputmode="numeric">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="2" inputmode="numeric">
+                                    <input type="text" class="otp-input" maxlength="1" data-index="3" inputmode="numeric">
+                                </div>
+                                <div class="verify-button">
+                                    <button type="button" id="verifyOtpBtn" class="button-primary verify-otp-btn">
+                                        <i class="fas fa-check"></i> Verify OTP
+                                    </button>
+                                </div>
+                                <div class="timer" id="timerDisplay"></div>
+                                <p style="font-size: 12px; margin-top: 10px; text-align: center;">
+                                    Didn't receive code? <span class="resend-link" id="resendLink">Resend</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-section" id="passwordSection" style="display: none;">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock"></i> Password
+                            </label>
+                            <input type="password" id="password" name="password" placeholder="Min. 6 characters" required autocomplete="new-password">
+                            <small class="form-help">Must be at least 6 characters</small>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="form-section" id="confirmPasswordSection" style="display: none;">
+                            <label for="confirmPassword" class="form-label">
+                                <i class="fas fa-lock"></i> Confirm Password
+                            </label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required autocomplete="new-password">
+                        </div>
+
+                        <!-- User Type Selection -->
+                        <div class="form-section user-type-section" id="userTypeSection" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-user-tag"></i> Choose Your Role
+                            </label>
+                            <div class="user-type-selection">
+                                <label class="user-type-option">
+                                    <input type="radio" name="user_type" value="student" checked>
+                                    <div class="user-type-card">
+                                        <div class="user-type-icon">
+                                            <i class="fas fa-graduation-cap"></i>
+                                        </div>
+                                        <h3>Student</h3>
+                                        <p>Get guidance and career support</p>
+                                    </div>
+                                </label>
+                                <label class="user-type-option">
+                                    <input type="radio" name="user_type" value="mentor">
+                                    <div class="user-type-card">
+                                        <div class="user-type-icon">
+                                            <i class="fas fa-chalkboard-user"></i>
+                                        </div>
+                                        <h3>Mentor</h3>
+                                        <p>Guide and help others</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="button-primary full-width" id="submitBtn" style="display: none;">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </form>
+
+                    <!-- Log In Link -->
+                    <p class="auth-footer">
+                        Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 CareerCompassAI. All rights reserved.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        const nameField = document.getElementById('name');
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        const signupForm = document.getElementById('signupForm');
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+        const otpSection = document.getElementById('otpSection');
+        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const errorMessage = document.getElementById('errorMessage');
+        const emailVerified = document.getElementById('emailVerified');
+        const passwordSection = document.getElementById('passwordSection');
+        const confirmPasswordSection = document.getElementById('confirmPasswordSection');
+        const userTypeSection = document.getElementById('userTypeSection');
+        const submitBtn = document.getElementById('submitBtn');
+        const resendLink = document.getElementById('resendLink');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        let otpTimerInterval;
+        let otpVerified = false;
+        let currentEmail = '';
+
+        // Clear form fields on page load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                nameField.value = '';
+                emailField.value = '';
+                passwordField.value = '';
+                confirmPasswordField.value = '';
+            }, 50);
+        });
+
+        // Send OTP Button Click
+        sendOtpBtn.addEventListener('click', async function() {
+            const email = emailField.value.trim();
+
+            // Validate email
+            if (!email) {
+                showError('Please enter an email address');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            sendOtpBtn.disabled = true;
+            sendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                const response = await fetch('/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showError(result.error || 'Failed to send OTP');
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Verify';
+                    return;
+                }
+
+                currentEmail = email;
+                emailField.disabled = true;
+                otpSection.classList.add('show');
+                otpTimerInterval = startOtpTimer();
+                sendOtpBtn.innerHTML = '<i class="fas fa-check"></i> Code Sent';
+                sendOtpBtn.disabled = true;
+                clearError();
+
+                // Focus on first OTP input
+                otpInputs[0].focus();
+            } catch (error) {
+                console.error('Error:', error);
+                showError('An error occurred while sending OTP');
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Verify';
+            }
+        });
+
+        // OTP Input Handler - Move to next input on digit entry
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                // Only allow digits
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                // Move to next input
+                if (this.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                // Backspace to previous input
+                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Verify OTP Button Click
+        verifyOtpBtn.addEventListener('click', async function() {
+            const otpValue = Array.from(otpInputs).map(input => input.value).join('');
+
+            if (otpValue.length !== 4) {
+                showError('Please enter a 4-digit OTP');
+                return;
+            }
+
+            verifyOtpBtn.disabled = true;
+            verifyOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                const response = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: currentEmail,
+                        otp: otpValue
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showError(result.error || 'Invalid OTP');
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.innerHTML = '<i class="fas fa-check"></i> Verify OTP';
+                    return;
+                }
+
+                // OTP Verified
+                otpVerified = true;
+                clearError();
+                clearInterval(otpTimerInterval);
+                
+                // Hide OTP section and show password/user type sections
+                otpSection.classList.remove('show');
+                emailVerified.classList.add('show');
+                passwordSection.style.display = 'block';
+                confirmPasswordSection.style.display = 'block';
+                userTypeSection.style.display = 'block';
+                submitBtn.style.display = 'block';
+                resendLink.style.display = 'none';
+
+                verifyOtpBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verified';
+                passwordField.focus();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('An error occurred while verifying OTP');
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtn.innerHTML = '<i class="fas fa-check"></i> Verify OTP';
+            }
+        });
+
+        // Resend Link Click
+        resendLink.addEventListener('click', async function() {
+            const email = currentEmail;
+
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.opacity = '0.5';
+
+            try {
+                const response = await fetch('/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    clearError();
+                    // Reset OTP inputs
+                    otpInputs.forEach(input => input.value = '');
+                    otpInputs[0].focus();
+                    // Restart timer
+                    clearInterval(otpTimerInterval);
+                    otpTimerInterval = startOtpTimer();
+                } else {
+                    showError(result.error || 'Failed to resend OTP');
+                }
+            } catch (error) {
+                showError('An error occurred while resending OTP');
+            }
+
+            resendLink.style.pointerEvents = 'auto';
+            resendLink.style.opacity = '1';
+        });
+
+        // Start OTP Timer
+        function startOtpTimer() {
+            let timeLeft = 300; // 5 minutes
+
+            timerDisplay.textContent = `Code expires in ${timeLeft}s`;
+
+            return setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Code expires in ${timeLeft}s`;
+
+                if (timeLeft === 0) {
+                    clearInterval(otpTimerInterval);
+                    otpInputs.forEach(input => input.disabled = true);
+                    verifyOtpBtn.disabled = true;
+                    timerDisplay.textContent = 'Code expired. Please request a new one.';
+                    timerDisplay.style.color = '#dc3545';
+                }
+            }, 1000);
+        }
+
+        // Form Submission
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!otpVerified) {
+                showError('Please verify your email first');
+                return;
+            }
+
+            const password = passwordField.value;
+            const confirmPassword = confirmPasswordField.value;
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match!');
+                passwordField.value = '';
+                confirmPasswordField.value = '';
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+            try {
+                const response = await fetch('{{ url_for("auth.signup") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: nameField.value,
+                        email: currentEmail,
+                        password: password,
+                        user_type: document.querySelector('input[name="user_type"]:checked').value
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showError(result.error || 'Signup failed');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+                    return;
+                }
+
+                clearError();
+                alert('Account created successfully! Please log in.');
+                signupForm.reset();
+                window.location.href = '{{ url_for("auth.login") }}';
+            } catch (error) {
+                console.error('Error:', error);
+                showError('An error occurred during signup');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+            }
+        });
+
+        // Error Message Handler
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'flex';
+        }
+
+        function clearError() {
+            errorMessage.textContent = '';
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

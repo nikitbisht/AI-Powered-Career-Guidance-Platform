@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Mentor - CareerCompassAI</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-compass"></i>
+                <span>CareerCompassAI</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                
+                {% if current_user.is_authenticated %}
+                    {% if current_user.user_type == 'student' %}
+                        <li><a href="{{ url_for('resume_page') }}" class="nav-link">
+                            <i class="fas fa-file-alt"></i> Resume
+                        </a></li>
+                        <li><a href="{{ url_for('jobs_page') }}" class="nav-link">
+                            <i class="fas fa-briefcase"></i> Jobs
+                        </a></li>
+                        <li><a href="{{ url_for('chatbot_page') }}" class="nav-link active">
+                            <i class="fas fa-robot"></i> AI Mentor
+                        </a></li>
+                        <li><a href="{{ url_for('mentorship_page') }}" class="nav-link">
+                            <i class="fas fa-handshake"></i> Mentors
+                        </a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('mentorship_page') }}" class="nav-link">
+                            <i class="fas fa-handshake"></i> Mentorship
+                        </a></li>
+                        <li><a href="{{ url_for('profile_page') }}" class="nav-link">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <div class="user-menu">
+                {% if current_user.is_authenticated %}
+                    <div>
+                        <div class="user-name">
+                            <i class="fas fa-user"></i> {{ current_user.name }}
+                        </div>
+                        <div class="user-type">{{ current_user.user_type.upper() }}</div>
+                    </div>
+                    {% if current_user.user_type == 'mentor' %}
+                        <a href="{{ url_for('profile_page') }}" class="logout-link">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{{ url_for('auth.signup') }}" class="nav-link" style="background: var(--primary-color); color: white; padding: 0.5rem 1.2rem; border-radius: 6px;">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                {% endif %}
+                <button class="theme-toggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Container -->
+    <div class="container">
+        <section class="page-section chatbot-section">
+            <h1><i class="fas fa-robot"></i> AI Career Mentor</h1>
+            <p class="section-subtitle">Chat with an AI expert about your career, resume, and skills</p>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div id="chatMessages" class="chat-messages">
+                    <div class="message mentor-message">
+                        <div class="message-content">
+                            Hello! 👋 I'm your AI Career Mentor. I'm here to help you with resume tips, career guidance, job search strategies, and skill development. What would you like to know?
+                        </div>
+                        <small>CareerCompass AI</small>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-area">
+                    <input type="text" id="userInput" placeholder="Type your question here..." class="chat-input">
+                    <button onclick="sendMessage()" class="chat-send-btn">Send</button>
+                    <button onclick="clearChat()" class="chat-clear-btn">Clear</button>
+                </div>
+            </div>
+
+            <!-- Sample Questions -->
+            <div class="sample-questions">
+                <p>Quick questions you can ask:</p>
+                <button class="sample-btn" onclick="quickAsk('How can I improve my resume?')">📄 Improve Resume</button>
+                <button class="sample-btn" onclick="quickAsk('What are the top skills for Data Science?')">💻 Tech Skills</button>
+                <button class="sample-btn" onclick="quickAsk('How do I prepare for a job interview?')">🎤 Interview Tips</button>
+                <button class="sample-btn" onclick="quickAsk('What is a good career transition strategy?')">🚀 Career Path</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 CareerCompassAI. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Session ID for conversation continuity
+        const sessionId = 'session_' + Date.now();
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+            input.value = '';
+            
+            // Show thinking indicator
+            const thinkingMsg = addMessageToChat('...', 'mentor');
+            thinkingMsg.classList.add('thinking');
+            
+            try {
+                // Send message to backend
+                const response = await fetch('/api/chatbot/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message,
+                        session_id: sessionId
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error getting response');
+                }
+                
+                const data = await response.json();
+                
+                // Remove thinking message and add actual response
+                thinkingMsg.remove();
+                addMessageToChat(data.response, 'mentor');
+                
+                // Scroll to bottom
+                scrollToBottom();
+            } catch (error) {
+                // Remove thinking message
+                thinkingMsg.remove();
+                // Show error message
+                addMessageToChat('Sorry, I encountered an error. Make sure the backend is running. Error: ' + error.message, 'mentor', true);
+                scrollToBottom();
+            }
+        }
+
+        // Quick question button
+        function quickAsk(question) {
+            document.getElementById('userInput').value = question;
+            sendMessage();
+        }
+
+        // Add message to chat
+        function addMessageToChat(text, sender = 'user', isError = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender === 'user' ? 'message user-message' : 'message mentor-message';
+            if (isError) messageDiv.classList.add('error-message');
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            messageDiv.appendChild(contentDiv);
+            
+            if (sender === 'mentor') {
+                const senderName = document.createElement('small');
+                senderName.textContent = 'CareerCompass AI';
+                messageDiv.appendChild(senderName);
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            return messageDiv;
+        }
+
+        // Clear chat
+        function clearChat() {
+            if (confirm('Are you sure you want to clear the conversation?')) {
+                // Clear messages from UI
+                const chatMessages = document.getElementById('chatMessages');
+                const messages = chatMessages.querySelectorAll('.message:not(:first-child)');
+                messages.forEach(msg => msg.remove());
+                
+                // Call backend to clear session
+                fetch('/api/chatbot/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                }).catch(err => console.error('Error clearing session:', err));
+            }
+        }
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Enter key sends message
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Load sample response for demo
+        window.addEventListener('load', function() {
+            fetch('/api/chatbot/sample')
+                .catch(() => {
+                    console.log('Backend not running yet, sample will be loaded when backend starts');
+                });
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+/* Professional Authentication Page Styling */
+
+/* Auth Page Layout */
+.auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #ecf0f1 100%);
+}
+
+body.dark-mode .auth-page {
+    background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+}
+
+.auth-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    width: 100%;
+    max-width: 1000px;
+    align-items: center;
+}
+
+/* Benefits Side */
+.auth-side-benefits {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.benefits-content h2 {
+    color: var(--secondary-color);
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.benefits-content > p {
+    color: var(--text-light);
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+}
+
+.benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.benefit-item i {
+    color: var(--secondary-color);
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+/* Form Side */
+.auth-side-form {
+    display: flex;
+    justify-content: center;
+}
+
+.auth-card {
+    background: var(--bg-white);
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 400px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .auth-card {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.auth-card h1 {
+    color: var(--primary-color);
+    font-size: 1.7rem;
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+    text-align: left;
+}
+
+.auth-subtitle {
+    color: var(--text-light);
+    text-align: left;
+    margin-bottom: 1.8rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+    margin-bottom: 1.8rem;
+}
+
+/* Input Fields Styling */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: var(--bg-white);
+    color: var(--text-dark);
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"] {
+    background: #3d4d5c;
+    color: #ecf0f1;
+    border-color: #555;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    background: var(--bg-white);
+}
+
+body.dark-mode input[type="text"]:focus,
+body.dark-mode input[type="email"]:focus,
+body.dark-mode input[type="password"]:focus {
+    background: #4a5f70;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover {
+    border-color: var(--secondary-color);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder {
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+body.dark-mode input[type="text"]::placeholder,
+body.dark-mode input[type="email"]::placeholder,
+body.dark-mode input[type="password"]::placeholder {
+    color: #95a5a6;
+}
+
+/* Form Sections */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label i {
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+}
+
+/* User Type Section */
+.user-type-section {
+    margin: 0.5rem 0;
+}
+
+.user-type-selection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+}
+
+.user-type-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-type-option input[type="radio"] {
+    display: none;
+}
+
+.user-type-card {
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: var(--bg-light);
+}
+
+body.dark-mode .user-type-card {
+    background: rgba(52, 152, 219, 0.05);
+}
+
+.user-type-option input[type="radio"]:checked + .user-type-card {
+    border-color: var(--secondary-color);
+    background: rgba(52, 152, 219, 0.1);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.user-type-card:hover {
+    border-color: var(--secondary-color);
+}
+
+.user-type-icon {
+    font-size: 1.8rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.4rem;
+}
+
+.user-type-card h3 {
+    color: var(--text-dark);
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+}
+
+.user-type-card p {
+    color: var(--text-light);
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+/* Login Options */
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0 1rem 0;
+    font-size: 0.85rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.remember-me input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--secondary-color);
+}
+
+.forgot-password {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    color: var(--accent-color);
+}
+
+/* Alert Messages */
+.alert {
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.alert i {
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 3px solid #c62828;
+}
+
+.alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 3px solid #2e7d32;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-left: 3px solid #1565c0;
+}
+
+/* Full Width Button */
+.button-primary.full-width {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.button-primary.full-width:hover {
+    background: #2980b9;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Auth Footer */
+.auth-footer {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-top: 1.2rem;
+}
+
+.auth-footer a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-footer a:hover {
+    color: var(--accent-color);
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .auth-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .auth-side-benefits {
+        order: 2;
+        padding: 1rem 0;
+    }
+
+    .auth-side-form {
+        order: 1;
+    }
+
+    .benefits-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .benefits-list {
+        gap: 0.8rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .auth-page {
+        padding: 1rem;
+        min-height: auto;
+    }
+
+    .auth-wrapper {
+        gap: 1.5rem;
+    }
+
+    .auth-card {
+        padding: 1.8rem;
+        max-width: 100%;
+    }
+
+    .auth-card h1 {
+        font-size: 1.4rem;
+    }
+
+    .user-type-selection {
+        grid-template-columns: 1fr;
+    }
+
+    .benefits-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .benefit-item {
+        font-size: 0.85rem;
+    }
+
+    .login-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
