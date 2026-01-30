@@ -72,7 +72,7 @@ MAIL_DEFAULT_SENDER=CareerCompassAI <your-email@gmail.com>
 
 5. **Run the application**
 ```bash
-python app.py
+python run.py
 ```
 
 6. **Open in browser**
@@ -87,10 +87,10 @@ http://localhost:5000
 ```
 AI-Powered-Career-Guidance-Platform-main/
 │
+├── 📄 run.py                          ← internally run app.py and initilize the socket.io
 ├── 📄 app.py                          ← Main Flask application
 ├── 📄 requirements.txt                ← Python dependencies
 ├── 📄 .env                            ← Environment variables (create this)
-├── 📄 .env.example                    ← Example configuration
 │
 ├── 🐍 backend/                        ← Backend logic
 │   ├── __init__.py
